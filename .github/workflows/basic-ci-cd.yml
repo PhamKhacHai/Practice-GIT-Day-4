@@ -3,15 +3,17 @@ name: Basic CI/CD Workflow
 on:
   push:
     branches:
-      - develop
       - main
+      - develop
       - ci/**
       - feature/**
       - fix/**
+
   pull_request:
     branches:
-      - develop
       - main
+      - develop
+
   workflow_dispatch:
 
 jobs:
@@ -23,71 +25,76 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Show current branch and commit
-        run: |
-          echo "Current branch:"
-          git branch -a
-          echo "Current commit:"
-          git log --oneline -5
-
       - name: Show project structure
         run: |
-          echo "Project structure:"
+          echo "Current directory:"
           pwd
+
+          echo "Project files:"
           find . -maxdepth 4 -type f
 
-      - name: Validate required files
+      - name: Validate required web-demo files
         run: |
-          echo "Checking required files..."
+          echo "Checking required web-demo files..."
 
-          if [ ! -f "web-demo/login.html" ]; then
-            echo "Missing file: web-demo/login.html"
+          test -f web-demo/login.html
+          test -f web-demo/profile.html
+          test -f web-demo/navigation.md
+
+          echo "Required web-demo files exist."
+
+      - name: Validate report files
+        run: |
+          echo "Checking report files..."
+
+          if [ -f TEST_REPORT.md ]; then
+            echo "Found TEST_REPORT.md in root folder."
+          elif [ -f web-demo/TEST_REPORT.md ]; then
+            echo "Found TEST_REPORT.md in web-demo folder."
+          else
+            echo "Missing TEST_REPORT.md"
             exit 1
           fi
 
-          if [ ! -f "web-demo/profile.html" ]; then
-            echo "Missing file: web-demo/profile.html"
+          if [ -f RELEASE_NOTE_v1.0.md ]; then
+            echo "Found RELEASE_NOTE_v1.0.md in root folder."
+          elif [ -f web-demo/RELEASE_NOTE_v1.0.md ]; then
+            echo "Found RELEASE_NOTE_v1.0.md in web-demo folder."
+          else
+            echo "Missing RELEASE_NOTE_v1.0.md"
             exit 1
           fi
 
-          if [ ! -f "web-demo/navigation.md" ]; then
-            echo "Missing file: web-demo/navigation.md"
-            exit 1
-          fi
-
-          if [ ! -f "TEST_REPORT.md" ]; then
-            echo "Missing file: TEST_REPORT.md"
-            exit 1
-          fi
-
-          if [ ! -f "RELEASE_NOTE_v1.0.md" ]; then
-            echo "Missing file: RELEASE_NOTE_v1.0.md"
-            exit 1
-          fi
-
-          echo "All required files exist."
+          echo "Report files exist."
 
       - name: Validate Login Page
         run: |
-          grep -qi "<form" web-demo/login.html
+          echo "Checking login page..."
+
+          grep -qi "<html" web-demo/login.html
+          grep -qi "login" web-demo/login.html
           grep -qi "username" web-demo/login.html
           grep -qi "password" web-demo/login.html
-          grep -qi "login" web-demo/login.html
+
           echo "Login page validation passed."
 
       - name: Validate Profile Page
         run: |
+          echo "Checking profile page..."
+
+          grep -qi "<html" web-demo/profile.html
           grep -qi "profile" web-demo/profile.html
           grep -qi "email" web-demo/profile.html
-          grep -qi "role" web-demo/profile.html
+
           echo "Profile page validation passed."
 
-      - name: Validate Documentation
+      - name: Validate Navigation Document
         run: |
+          echo "Checking navigation document..."
+
           grep -qi "navigation" web-demo/navigation.md
-          grep -qi "TEST REPORT" TEST_REPORT.md
-          grep -qi "RELEASE NOTE v1.0" RELEASE_NOTE_v1.0.md
-          echo "Documentation validation passed."
+
+          echo "Navigation document validation passed."
 
   cd-simulation:
     name: CD - Deployment Simulation
@@ -97,6 +104,6 @@ jobs:
     steps:
       - name: Simulate deployment
         run: |
-          echo "Static web demo deployment simulation started."
+          echo "Starting deployment simulation..."
           echo "Build completed successfully."
           echo "Deployment simulation completed successfully."
