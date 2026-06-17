@@ -23,18 +23,48 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Show current branch and commit
+        run: |
+          echo "Current branch:"
+          git branch -a
+          echo "Current commit:"
+          git log --oneline -5
+
       - name: Show project structure
         run: |
           echo "Project structure:"
-          ls -R
+          pwd
+          find . -maxdepth 4 -type f
 
       - name: Validate required files
         run: |
-          test -f web-demo/login.html
-          test -f web-demo/profile.html
-          test -f web-demo/navigation.md
-          test -f TEST_REPORT.md
-          test -f RELEASE_NOTE_v1.0.md
+          echo "Checking required files..."
+
+          if [ ! -f "web-demo/login.html" ]; then
+            echo "Missing file: web-demo/login.html"
+            exit 1
+          fi
+
+          if [ ! -f "web-demo/profile.html" ]; then
+            echo "Missing file: web-demo/profile.html"
+            exit 1
+          fi
+
+          if [ ! -f "web-demo/navigation.md" ]; then
+            echo "Missing file: web-demo/navigation.md"
+            exit 1
+          fi
+
+          if [ ! -f "TEST_REPORT.md" ]; then
+            echo "Missing file: TEST_REPORT.md"
+            exit 1
+          fi
+
+          if [ ! -f "RELEASE_NOTE_v1.0.md" ]; then
+            echo "Missing file: RELEASE_NOTE_v1.0.md"
+            exit 1
+          fi
+
           echo "All required files exist."
 
       - name: Validate Login Page
